@@ -4,6 +4,8 @@ from flask_sqlalchemy import SQLAlchemy
 from flask_marshmallow import Marshmallow
 from marshmallow import ValidationError
 from SpheresAPI.database import db, ma
+from SpheresAPI.utils import paginate_query
+
 
 def create_app():
 
@@ -33,6 +35,28 @@ def create_app():
     api_users_schema = APIUserSchema(many=True)
     api_request_schema = APIRequestSchema()
     api_requests_schema = APIRequestSchema(many=True)
+
+    # Define Routes with Pagination
+
+    @app.route('/round_spheres', methods=['GET'])
+    def get_round_spheres():
+        return paginate_query(RoundSphere.query, round_sphere_schema)
+
+    @app.route('/locations', methods=['GET'])
+    def get_locations():
+        return paginate_query(Location.query, location_schema)
+
+    @app.route('/observations', methods=['GET'])
+    def get_observations():
+        return paginate_query(Observation.query, observation_schema)
+
+    @app.route('/api_users', methods=['GET'])
+    def get_api_users():
+        return paginate_query(APIUser.query, api_user_schema)
+
+    @app.route('/api_requests', methods=['GET'])
+    def get_api_requests():
+        return paginate_query(APIRequest.query, api_request_schema)
 
     # Error Handlers
     @app.errorhandler(404)
