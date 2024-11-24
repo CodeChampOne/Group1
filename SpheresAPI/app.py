@@ -1,10 +1,8 @@
-from flask import Flask
+# app.py (inside SpheresAPI directory)
+from SpheresAPI import create_app
 
-app = Flask(__name__)
+# Create the application instance using the factory function
+app = create_app()
 
-@app.route('/')
-def home():
-    return "Hello, RoundSpheres API!"
-
-if __name__ == '__main__':
+if __name__ == "__main__":
     app.run(debug=True)
