@@ -2,73 +2,43 @@ from SpheresAPI.database import db  # Import db from database.py
 
 
 class Location(db.Model):
-   __tablename__ = 'locations'
-   Location_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-   Location_Name = db.Column(db.String(100), nullable=False)
-   Location_Address = db.Column(db.String(200))
+    __tablename__ = 'locations'
+    Location_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    Location_Name = db.Column(db.String(100), nullable=False)
+    Coordinates = db.Column(db.String(200))
 
 
-   # Relationships
-   round_spheres = db.relationship("RoundSphere", back_populates="location")
-   observations = db.relationship("Observation", back_populates="location")
+    # Relationships
+    devices = db.relationship("Device", back_populates="location", cascade="all, delete-orphan")
+    observations = db.relationship("Observation", back_populates="location", cascade="all, delete-orphan")
 
 
-class RoundSphere(db.Model):
-   __tablename__ = 'round_spheres'
-   Sphere_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-   Location_ID = db.Column(db.Integer, db.ForeignKey('locations.Location_ID'))
-   Sphere_Name = db.Column(db.String(100), nullable=False)
-   Sphere_Address = db.Column(db.String(200))
+class Device(db.Model):
+    __tablename__ = 'devices'
+    Device_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    Location_ID = db.Column(db.Integer, db.ForeignKey('locations.Location_ID'), nullable=False)
+    Sphere_Name = db.Column(db.String(100), nullable=False)
+    Sphere_Address = db.Column(db.String(200))
 
-
-   # Relationships
-   location = db.relationship("Location", back_populates="round_spheres")
-   observations = db.relationship("Observation", back_populates="sphere")
+    # Relationships
+    location = db.relationship("Location", back_populates="devices")
+    observations = db.relationship("Observation", back_populates="device", cascade="all, delete-orphan")
 
 
 class Observation(db.Model):
-   __tablename__ = 'observations'
-   id = db.Column(db.Integer, primary_key=True, autoincrement=True)
-   Sphere_ID = db.Column(db.Integer, db.ForeignKey('round_spheres.Sphere_ID'))
-   Location_ID = db.Column(db.Integer, db.ForeignKey('locations.Location_ID'))
-   Date = db.Column(db.DateTime)
-   Time = db.Column(db.Time)
-   Temperature = db.Column(db.Float)
-   Humidity = db.Column(db.Float)
-   Status = db.Column(db.String(100))
+    __tablename__ = 'observations'
+    id = db.Column(db.Integer, primary_key=True, autoincrement=True)
+    Device_ID = db.Column(db.Integer, db.ForeignKey('devices.Device_ID'), nullable=False)
+    Location_ID = db.Column(db.Integer, db.ForeignKey('locations.Location_ID'), nullable=False)
+    Date = db.Column(db.Date, nullable=False)  # ISO 8601 - YYYYMMDD
+    Time = db.Column(db.Time, nullable=False)  # ISO 8601 - hh:mm:ss
+    Time_Zone = db.Column(db.String(10), nullable=False)  # ISO 8601 timezone e.g., UTC+10:00
+    Temperature = db.Column(db.Float, nullable=False)  # Water/air temperature in °C
+    Humidity = db.Column(db.Float, nullable=True)  # g/kg
+    Wind_Direction = db.Column(db.Float, nullable=True)  # Wind direction in Decimal degrees
+    Precipitation = db.Column(db.Float, nullable=True)  # Precipitation in mm
+    Haze = db.Column(db.String(255), nullable=True)  # % % and notes
 
-
-   # Relationships
-   location = db.relationship("Location", back_populates="observations")
-   sphere = db.relationship("RoundSphere", back_populates="observations")
-
-
-class APIUser(db.Model):
-   __tablename__ = 'api_user'
-   User_ID = db.Column(db.Integer, primary_key=True)
-   apiToken = db.Column(db.String(255), nullable=False)
-   User_First_Name = db.Column(db.String(50), nullable=False)
-   User_Last_Name = db.Column(db.String(50), nullable=False)
-   User_Name = db.Column(db.String(50), nullable=False)
-   Email = db.Column(db.String(120), nullable=False)
-   Date_Joined = db.Column(db.String(50), nullable=False)
-   Last_Modified = db.Column(db.String(50), nullable=False)
-
-   # Relationships
-   api_requests = db.relationship('APIRequest', back_populates='user', cascade='all, delete-orphan')
-    #def __repr__(self):
-    #   return f'<APIUser {self.User_Name}>'
-
-
-class APIRequest(db.Model):
-   __tablename__ = 'api_requests'
-   requestid = db.Column(db.Integer, primary_key=True, autoincrement=True)
-   endpoint = db.Column(db.String(200), nullable=False)
-   parameters = db.Column(db.String(500))
-   timestamp = db.Column(db.DateTime)
-   status = db.Column(db.String(100))
-   User_ID = db.Column(db.Integer, db.ForeignKey('api_user.User_ID'), nullable=False)
-
-
-   # Relationships
-   user = db.relationship('APIUser', back_populates='api_requests')
+    # Relationships
+    location = db.relationship("Location", back_populates="observations")
+    device = db.relationship("Device", back_populates="observations")

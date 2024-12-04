@@ -1,7 +1,7 @@
 import pytest
 from SpheresAPI import create_app
 from SpheresAPI.database import db
-from SpheresAPI.models import Location, RoundSphere, Observation, APIUser, APIRequest
+from SpheresAPI.models import Location, Device, Observation
 from datetime import datetime
 
 @pytest.fixture
@@ -28,66 +28,77 @@ def runner(app):
 
 def test_location_crud(client):
     # Create
-    location = Location(Location_Name="Test Location", Location_Address="123 Test St")
+    location = Location(Location="Test Location", Coordinates="40.7128,-74.0060")
     db.session.add(location)
     db.session.commit()
 
     # Read
     retrieved_location = Location.query.first()
     assert retrieved_location is not None
-    assert retrieved_location.Location_Name == "Test Location"
-    assert retrieved_location.Location_Address == "123 Test St"
+    assert retrieved_location.Location == "Test Location"
+    assert retrieved_location.Coordinates == "40.7128,-74.0060"
 
     # Update
-    retrieved_location.Location_Name = "Updated Location"
+    retrieved_location.Location = "Updated Location"
     db.session.commit()
     updated_location = Location.query.first()
-    assert updated_location.Location_Name == "Updated Location"
+    assert updated_location.Location == "Updated Location"
 
     # Delete
     db.session.delete(updated_location)
     db.session.commit()
     assert Location.query.first() is None
 
-def test_round_sphere_crud(client):
+def test_device_crud(client):
     # Create
-    location = Location(Location_Name="Test Location", Location_Address="123 Test St")
+    location = Location(Location="Test Location", Coordinates="40.7128,-74.0060")
     db.session.add(location)
     db.session.commit()
 
-    sphere = RoundSphere(Location_ID=location.Location_ID, Sphere_Name="Test Sphere", Sphere_Address="456 Sphere Ave")
-    db.session.add(sphere)
+    device = Device(Location_ID=location.Location_ID, Sphere_Name="Test Device", Sphere_Address="123 Device St")
+    db.session.add(device)
     db.session.commit()
 
     # Read
-    retrieved_sphere = RoundSphere.query.first()
-    assert retrieved_sphere is not None
-    assert retrieved_sphere.Sphere_Name == "Test Sphere"
-    assert retrieved_sphere.Sphere_Address == "456 Sphere Ave"
-    assert retrieved_sphere.location == location
+    retrieved_device = Device.query.first()
+    assert retrieved_device is not None
+    assert retrieved_device.Sphere_Name == "Test Device"
+    assert retrieved_device.Sphere_Address == "123 Device St"
+    assert retrieved_device.location == location
 
     # Update
-    retrieved_sphere.Sphere_Name = "Updated Sphere"
+    retrieved_device.Sphere_Name = "Updated Device"
     db.session.commit()
-    updated_sphere = RoundSphere.query.first()
-    assert updated_sphere.Sphere_Name == "Updated Sphere"
+    updated_device = Device.query.first()
+    assert updated_device.Sphere_Name == "Updated Device"
 
     # Delete
-    db.session.delete(updated_sphere)
+    db.session.delete(updated_device)
     db.session.commit()
-    assert RoundSphere.query.first() is None
+    assert Device.query.first() is None
 
 def test_observation_crud(client):
     # Create
-    location = Location(Location_Name="Test Location", Location_Address="123 Test St")
+    location = Location(Location="Test Location", Coordinates="40.7128,-74.0060")
     db.session.add(location)
     db.session.commit()
 
-    sphere = RoundSphere(Location_ID=location.Location_ID, Sphere_Name="Test Sphere", Sphere_Address="456 Sphere Ave")
-    db.session.add(sphere)
+    device = Device(Location_ID=location.Location_ID, Sphere_Name="Test Device", Sphere_Address="123 Device St")
+    db.session.add(device)
     db.session.commit()
 
-    observation = Observation(Sphere_ID=sphere.Sphere_ID, Location_ID=location.Location_ID, Date=datetime(2024, 11, 24), Time=datetime.strptime("10:00:00", "%H:%M:%S").time(), Temperature=25.0, Humidity=50.0, Status="Normal")
+    observation = Observation(
+        Device_ID=device.Device_ID,
+        Location_ID=location.Location_ID,
+        Date=datetime(2024, 11, 24).date(),
+        Time=datetime.strptime("10:00:00", "%H:%M:%S").time(),
+        Time_Zone="UTC+01:00",
+        Temperature=25.0,
+        Humidity=50.0,
+        Wind_Direction=180.0,
+        Precipitation=5.0,
+        Haze="Clear skies",
+    )
     db.session.add(observation)
     db.session.commit()
 
@@ -96,9 +107,7 @@ def test_observation_crud(client):
     assert retrieved_observation is not None
     assert retrieved_observation.Temperature == 25.0
     assert retrieved_observation.Humidity == 50.0
-    assert retrieved_observation.Status == "Normal"
-    assert retrieved_observation.location == location
-    assert retrieved_observation.sphere == sphere
+    assert retrieved_observation.device == device
 
     # Update
     retrieved_observation.Temperature = 30.0
@@ -110,57 +119,3 @@ def test_observation_crud(client):
     db.session.delete(updated_observation)
     db.session.commit()
     assert Observation.query.first() is None
-
-def test_api_user_crud(client):
-    # Create
-    user = APIUser(apiToken="token12345", User_First_Name="John", User_Last_Name="Doe", User_Name="johndoe", Email="john.doe@example.com", Date_Joined="2024-01-01", Last_Modified="2024-01-02")
-    db.session.add(user)
-    db.session.commit()
-
-    # Read
-    retrieved_user = APIUser.query.first()
-    assert retrieved_user is not None
-    assert retrieved_user.User_First_Name == "John"
-    assert retrieved_user.User_Last_Name == "Doe"
-    assert retrieved_user.User_Name == "johndoe"
-    assert retrieved_user.Email == "john.doe@example.com"
-
-    # Update
-    retrieved_user.User_First_Name = "Jane"
-    db.session.commit()
-    updated_user = APIUser.query.first()
-    assert updated_user.User_First_Name == "Jane"
-
-    # Delete
-    db.session.delete(updated_user)
-    db.session.commit()
-    assert APIUser.query.first() is None
-
-def test_api_request_crud(client):
-    # Create
-    user = APIUser(apiToken="token12345", User_First_Name="John", User_Last_Name="Doe", User_Name="johndoe", Email="john.doe@example.com", Date_Joined="2024-01-01", Last_Modified="2024-01-02")
-    db.session.add(user)
-    db.session.commit()
-
-    request = APIRequest(endpoint="/api/test", parameters="param=value", timestamp=datetime(2024, 11, 24, 10, 0, 0), status="Success", User_ID=user.User_ID)
-    db.session.add(request)
-    db.session.commit()
-
-    # Read
-    retrieved_request = APIRequest.query.first()
-    assert retrieved_request is not None
-    assert retrieved_request.endpoint == "/api/test"
-    assert retrieved_request.parameters == "param=value"
-    assert retrieved_request.status == "Success"
-    assert retrieved_request.user == user
-
-    # Update
-    retrieved_request.status = "Failed"
-    db.session.commit()
-    updated_request = APIRequest.query.first()
-    assert updated_request.status == "Failed"
-
-    # Delete
-    db.session.delete(updated_request)
-    db.session.commit()
-    assert APIRequest.query.first() is None
