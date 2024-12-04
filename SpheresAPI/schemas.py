@@ -5,7 +5,7 @@ from SpheresAPI.models import Location, Device, Observation
 class LocationSchema(ma.SQLAlchemyAutoSchema):
     class Meta:
         model = Location
-        fields = ("Location_ID", "Location", "Coordinates")
+        fields = ("Location_ID", "Location_Name", "Coordinates")
 
     Location = fields.String(required=True, validate=validate.Length(min=1, max=100))
     Coordinates = fields.String(validate=validate.Length(max=200))

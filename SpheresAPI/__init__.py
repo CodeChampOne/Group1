@@ -6,12 +6,11 @@ from marshmallow import ValidationError
 from SpheresAPI.database import db, ma
 from SpheresAPI.utils import paginate_query
 
-
 def create_app():
     app = Flask(__name__)
 
-    app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:hello@localhost/roundspheres'
-    #app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///roundspheres.db'
+    #app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://root:hello@localhost/roundspheres'
+    app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///roundspheres.db'
 
 
     app.config['SQLALCHEMY_ECHO'] = True #echos SQL for debug
@@ -21,7 +20,7 @@ def create_app():
     db.init_app(app)
     ma.init_app(app)
 
-    # Import models and schemas  after initializing db and ma
+    # Import models and schemas
     from SpheresAPI.models import Location, Device, Observation
     from SpheresAPI.schemas import LocationSchema, DeviceSchema, ObservationSchema
 
@@ -90,6 +89,7 @@ def create_app():
         return location_schema.jsonify(location)
 
     #PUT - Endpoint to update an existing Location
+    @app.route('/locations/<int:location_id>', methods=['PUT'])
     def update_location(location_id):
         location = Location.query.get_or_404(location_id)
         json_data = request.get_json()
@@ -261,7 +261,9 @@ def create_app():
 
    # Create the tables if they don't exist
     with app.app_context():
+        print("Creating tables...")
         db.create_all()
+        print("Tables created.")
 
     return app
 

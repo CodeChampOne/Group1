@@ -4,8 +4,9 @@ from SpheresAPI.database import db  # Import db from database.py
 class Location(db.Model):
     __tablename__ = 'locations'
     Location_ID = db.Column(db.Integer, primary_key=True, autoincrement=True)
-    Location = db.Column(db.String(100), nullable=False)
+    Location_Name = db.Column(db.String(100), nullable=False)
     Coordinates = db.Column(db.String(200))
+
 
     # Relationships
     devices = db.relationship("Device", back_populates="location", cascade="all, delete-orphan")
