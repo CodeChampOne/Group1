@@ -1,0 +1,10 @@
+<h1>Subscribers</h1>
+<ul>
+    {% for subscriber in subscribers %}
+        <li>
+            <a href="{% url 'subscriber_detail' subscriber.pk %}">
+                {{ subscriber.User_First_Name }} {{ subscriber.User_Last_Name }}
+            </a>
+        </li>
+    {% endfor %}
+</ul>

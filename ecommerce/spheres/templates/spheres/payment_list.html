@@ -1,0 +1,10 @@
+<h1>Payments</h1>
+<ul>
+    {% for payment in payments %}
+        <li>
+            <a href="{% url 'payment_detail' payment.pk %}">
+                Payment #{{ payment.id }} - ${{ payment.Amount }}
+            </a>
+        </li>
+    {% endfor %}
+</ul>
