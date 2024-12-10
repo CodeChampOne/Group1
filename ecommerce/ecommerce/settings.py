@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    'spheres',
 ]
 
 MIDDLEWARE = [
@@ -75,10 +76,19 @@ WSGI_APPLICATION = 'ecommerce.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.sqlite3',     # SQLite as the default
+        'NAME': BASE_DIR / 'roundspheres_website',  # SQLite database file
+    },
+    'mysql': {
+        'ENGINE': 'django.db.backends.mysql',  # Use MySQL as an optional database
+        'NAME': 'roundspheres_website',        # Name of your MySQL database
+        'USER': 'farnofar',                    # MySQL username
+        'PASSWORD': 'hello',                   # MySQL password
+        'HOST': 'localhost',                   # Host where MySQL is running
+        'PORT': '3306',                        # Default MySQL port
+    },
 }
+
 
 
 # Password validation
