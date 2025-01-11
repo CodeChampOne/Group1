@@ -11,9 +11,14 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 """
 
 from pathlib import Path
+import os
+from django.contrib.staticfiles import views
+from django.contrib.staticfiles.urls import staticfiles_urlpatterns
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
+
 
 
 # Quick-start development settings - unsuitable for production
@@ -25,7 +30,7 @@ SECRET_KEY = 'django-insecure-+mt5#q$wmklz*0x5a^!%2c&e2*!68do71(1+&0du8o3ph@&6a9
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['localhost', '127.0.0.1', '.roundspheresteam.com']
 
 
 # Application definition
@@ -37,6 +42,19 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+
+    'django.contrib.sites',
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'django_countries',
+    #'allauth.socialaccount.providers.snapchat',
+   # 'allauth.socialaccount.providers.twitter',
+   # 'allauth.socialaccount.providers.paypal',
+   # 'allauth.socialaccount.providers.linkedin',
+   # 'allauth.socialaccount.providers.stripe',
+    
+    'core'
 ]
 
 MIDDLEWARE = [
@@ -47,6 +65,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'ecommerce.urls'
@@ -54,7 +73,7 @@ ROOT_URLCONF = 'ecommerce.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [],
+        'DIRS': [str(BASE_DIR.joinpath('templates'))], 
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -67,6 +86,12 @@ TEMPLATES = [
     },
 ]
 
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'youremail@gmail.com'
+EMAIL_HOST_PASSWORD = 'yourpassword'
+EMAIL_PORT = 587
+
 WSGI_APPLICATION = 'ecommerce.wsgi.application'
 
 
@@ -75,9 +100,17 @@ WSGI_APPLICATION = 'ecommerce.wsgi.application'
 
 DATABASES = {
     'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': BASE_DIR / 'db.sqlite3',
-    }
+        'ENGINE': 'django.db.backends.sqlite3',     # SQLite as the default
+        'NAME': BASE_DIR / 'roundspheres_website',  # SQLite database file
+    },
+    'mysql': {
+        'ENGINE': 'django.db.backends.mysql',  # Use MySQL as an optional database
+        'NAME': 'roundspheres_website',        # Name of your MySQL database
+        'USER': 'farnofar',                    # MySQL username
+        'PASSWORD': 'hello',                   # MySQL password
+        'HOST': 'localhost',                   # Host where MySQL is running
+        'PORT': '3306',                        # Default MySQL port
+    },
 }
 
 
@@ -115,9 +148,28 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/5.1/howto/static-files/
 
-STATIC_URL = 'static/'
+#Static
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, 'static')
+]
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'assets')
+
+
+# Auth
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend'
+)
+SITE_ID = 1
+
+LOGIN_REDIRECT_URL = '/'
+LOGOUT_REDIRECT_URL = '/'
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/5.1/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+STRIPE_KEY = 'pk_test_51QfnSkIw2aknQkCPskaR4DuYGanYTtZMP0jvc3NEhDVYpOaSfApDfJKZEHJlpPGi9LlNM576GIczbCrqwof32CgL006aYuSQ4M'
